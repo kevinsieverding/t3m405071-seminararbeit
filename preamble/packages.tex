@@ -9,7 +9,7 @@
 \usepackage{calc}
 
 % language support
-\usepackage[american]{babel}
+\usepackage[ngerman]{babel}
 
 % advanced support for quotations
 \usepackage[
@@ -77,6 +77,12 @@
 
 % support for code listings
 \usepackage{minted}
+
+% Create a new environment for breaking code listings across pages.
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+
+% support for pseudo code
+\usepackage{algorithm}
 
 % wrapt text around figures
 \usepackage{wrapfig}

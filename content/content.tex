@@ -1,14 +1,145 @@
 % !TeX root = ../index.tex
 
-\section{Introduction}
+\section{Einleitung}
 
-\blindtext[2]
-\footcite[]{smith2010wealth}
+Lieferketten, welche im Laufe der Globalisierung zunehmend die Welt überspannen wurden in den vergangenen Jahren durch die Corona-Pandemie und den Angriffskrieg Russlands auf die Ukraine mehrmals erschüttert \parencite{linton_coronavirus_2020}.
+Als Resultat dessen haben sich zum einen viele Organisationen dazu entschieden, ihre Lieferketten zu diversifizieren, geographisch zu verkürzen (Backshoring) und erhöhten Wert auf Resilienz zu legen.
+Als Teil dessen hat das Supplier Risk Management an Bedeutung gewonnen.
+Diese Arbeit betrachtet, wie der Prozess der Lieferantenauswahl unter Berücksichtigung von Resilienzfaktoren mittels Computational Intelligence optimiert werden kann.
 
-\begin{wrapfigure}{l}{0.4\textwidth}
-  \centering
-  \includegraphics[width=0.35\textwidth]{threepwood.png}
-  \caption{The Greatest Pirate in the World}\label{fig:threepwood}
-\end{wrapfigure}
+Hierzu stellt Abschnitt \ref{sec:modeling} zunächst ein beispielhaftes Optimierungsproblem vor und modelliert dieses für die spätere Lösung mittels eines Optimierungsverfahrens.
+Abschnitt \ref{sec:optimization} stellt darauffolgend zwei Optimierungsverfahren vor, welche in Reihe auf das Modell angewendet werden könnten.
+Zunächst ein Greedy-Verfahren, welches vergleichsweise simpel ist und ein, womöglich lokales, Optimum findet und einen evolutionären Algorithmus, welcher daraufhin angewendet werden kann, um etwaige bessere Lösungen zu finden.
+Abschließend diskutiert Abschnitt \ref{sec:conclusion} die Ergebnisse und gibt einen Ausblick auf mögliche weitere Arbeit.
 
-\blindtext[2]
+\section{Modellierung}\label{sec:modeling}
+
+\subsection{Beispiel}\label{subsec:example}
+
+Als Grundlage für die Modellierung wird ein fiktives, europäisches Unternehmen betrachtet, welches in der Technologiebranche tätig ist.
+Dieses Unternehmen hat sich dazu entschieden, seine Lieferkette zu diversifizieren und die Anzahl der Lieferanten zu erhöhen.
+Hierzu soll ein Optimierungsverfahren entwickelt werden, welches die Einkäufer bei der Wahl der Lieferanten unterstützt, mit dem Ziel die Resilienz der Lieferkette zu maximieren.
+Dieses Ziel ist auszubalancieren mit dem Ziel des Einkaufs die Kosten der Anschaffung zu minimieren.
+
+Des Weiteren soll ebenfalls die Beziehung zu den Lieferanten in der Entscheidung berücksichtigt werden, mit dem Kalkül, dass eine gute Beziehung zu einem Lieferanten die Resilienz erhöht.
+Ebenfalls muss berücksichtigt werden, dass die Lieferanten Preisnachlässe je nach Bestellmenge in unterschiedlichen Stufen anbieten und nur verschiedene Bestellmengen bedienen können.
+
+\subsection{Modell}\label{subsec:model}
+
+% Die Kosten für die Anschaffung bei Lieferant $S_i$ je nach Bestellmenge ist abgebildet durch eine Funktion $K_i(x)$, wobei $x$ die Bestellmenge darstellt.
+% Eine Funktion $K_i(x)$ kann zum Beispiel so aussehen:
+
+% \begin{equation*}
+%   K_i(x) = \left\{
+%     \begin{array}{@{}l@{\thinspace}l}
+%        10,0*x & : x<1000\\
+%        9,5*x & : 1000 \le x < 2000\\
+%        9,0*x & : 2000 \le x < 5000\\
+%        8*x & : x \geq 5000\\
+%     \end{array}
+%   \right.
+% \end{equation*}
+
+Gegeben sei eine Menge von Lieferanten $S$, wobei $S_i$ einen einzelnen Lieferanten repräsentiert.
+Der Wert $M_i$ bildet die maximale Bestellmenge für das Produkt ab, welche der Lieferant bedienen kann.
+Dem gegenüber steht die zu beschaffene Menge eines Produktes $X$.
+Dabei wird die Menge an Produkten, die bei Lieferant $S_i$ bestellt werden, mit $x_i$ bezeichnet.
+
+Zudem werden jedem Lieferanten eine Reihe von Risikofaktoren zugeordnet, welche entweder aus einem internen Supplier Risk Management System oder einer B2B-Plattform wie SAP Ariba oder Alibaba stammen können.
+Diese Werte sind auf eine Skala von 0 bis 1 abgebildet und werden mit $R_{i,j}$ bezeichnet, wobei $j$ für den jeweiligen Risikofaktor steht.
+
+\cite{conte_supplier_2005} identifizieren sieben Risikofaktoren in ihrer Feldstudie bei T-Mobile Deutschland von denen hier vier exemplarisch betrachtet werden:
+
+\begin{enumerate}
+  \item Mengenrisiko
+  \item Qualitätsrisiko
+  \item Terminrisiko
+  \item Logistikrisiko
+\end{enumerate}
+
+Der Risikofaktor stellt hierbei eine Kombination aus der Wahrscheinlichkeit des Eintretens von Problemen und deren voraussichtlichen Auswirkungen dar.
+Ein Wert von 0 würde kein Risiko bedeuten, wohingegen ein Wert von 1 ein sehr hohes Risiko darstellt.
+Für einen Lieferanten aus China, bei dem ein essenzielles Teil bestellt werden soll, könnte zum Beispiel das Logistikrisiko mit einem Wert von 0,8 hoch angesetzt sein, da es aufgrund der aktuellen geopolitischen Lage zu Verzögerungen bei der Lieferung kommen könnte---mit schweren Auswirkungen auf die Produktion des Unternehmens.
+
+Zuletzt, wird jedem Lieferanten ein Wert $B_i$ zugeordnet, welcher die Beziehung zu dem Lieferanten beschreibt.
+Dieser Wert ist ebenfalls auf eine Skala von 0 bis 1 abgebildet und könnte zum Beispiel aus einem Supplier Relationship Management System stammen oder vom Einkäufer selbst festgelegt werden.
+
+Ziel ist es nun, die Bestellmenge $X$ derart auf eine Menge $S' \in S$ aufzuteilen, dass die Resilienz der Lieferkette maximiert wird.
+Hierzu gilt es folgende Zielfunktion zu maximieren:
+
+\begin{equation*}
+  Z(S') = \sum_{i=1}^n -1 * \left( \frac{\sum_{j=1}^m w_j * R_{i,j}}{m} \right) + w_{m+1} * B_i
+\end{equation*}
+
+Hierbei gilt es folgende Nebenbedingungen zu erfüllen:
+
+\begin{enumerate}
+  \item Die Summe der Bestellmengen $x_i$ muss gleich der zu beschaffenden Menge $X$ sein.
+  
+  \begin{equation*}
+    NB_1 : \sum_{i=1}^n x_i = x
+  \end{equation*}
+
+  \item Die Bestellmenge $x_i$ darf nicht größer sein als die maximale Bestellmenge $M_i$ des Lieferanten $S_i$.
+  
+  \begin{equation*}
+    NB_2 : x_i \leq M_i
+  \end{equation*}
+\end{enumerate}
+
+Die Gewichte $w_k$ sind dabei vom Einkäufer zu wählen und können je nach Situation angepasst werden.
+Handelt ich sich bei dem zu beschaffenen Produkt zum Beispiel um Massenware, bei der eine untergeordnete Rolle gegenüber der pünktlichen Lieferung spielt, könnten die Gewichte entsprechend gesetzt werden.
+
+\section{Optimierung}\label{sec:optimization}
+
+\subsection{Greedy-Algorithmen}\label{subsec:greedy}
+
+Um schnell zu einer Lösung zu kommen, kann ein Greedy-Algorithmus verwendet werden.
+Ein Ansatz kann sein einen zufälligen Lieferanten auszuwählen und dessen maximale Bestellmenge voll auszunutzen.
+Sollte diese nicht ausreichen um die zu beschaffende Menge zu decken, wird der nächste Lieferant ausgewählt und dessen maximale Bestellmenge voll ausgenutzt, bis die zu beschaffende Menge gedeckt ist.
+Dann wird die Lösung mit der Zielfunktion bewertet.
+Dieser Vorgang wird mehrfach wiederholt und die beste Lösung wird als Ergebnis verwendet.
+Der Quellcode \ref{lst:greedy1} zeigt diesen Ansatz in Pseudocode.
+
+\begin{longlisting}
+  \begin{minted}{text}
+    Input: X, S, M, Z
+    Output: selection, allotment, value
+  
+    selection = []                # Liste der ausgewählten Lieferanten
+    x = []                        # Liste der Bestellmenge pro Lieferant
+  
+    function addToSupplier(allt):
+      i = random(1, n)            # Wähle einen zufälligen Lieferanten
+      if S_i not in selection:    # Füge ihn zur Auswahl hinzu, falls noch 
+                                  #   nicht vorhanden
+        add S_i to selection
+      if x_i + allt > M_i:        # Überprüfe, ob die Zuweisung die maximale 
+                                  #   Bestellmenge überschreitet
+        allt = allt - (M_i - x_i) # Reduziere das Inkrement um die Menge bis 
+                                  #   zur maximalen Bestellmenge
+        x_i = M_i                 # Setze die Bestellmenge auf die maximale 
+                                  #   Bestellmenge
+        addToSupplier(allt)       # Füge den Rest des Zuweisung einem anderen 
+                                  #   Lieferanten hinzu
+      else:
+        x_i = x_i + allt          # Erhöhe die Bestellmenge um das Inkrement
+  
+    addToSupplier(X)              # Verteile die gesamte Bestellmenge auf
+                                  #   zufällige Lieferanten
+    return selection, x, Z(selection)
+  \end{minted}
+  \caption{Greedy-Algorithmus I}\label{lst:greedy1}
+\end{longlisting}
+
+Um diesen Ansatz noch zu verbessern, kann er um eine Art Gradientenabstieg erweitert werden.
+Hierzu werden Bruchteile des der zu beschaffenden Bestellmenge auf zufällige Lieferanten verteilt und die Zielfunktion bewertet.
+Hat die Verteilung die Zielfunktion nicht verbessert, wird die Verteilung verworfen und eine neue Verteilung wird erzeugt.
+Sollte die Zielfunktion nicht mehr zu verbessern sein, bevor die zu beschaffende Menge gedeckt ist, wird der Vorgang abgebrochen.
+Ansonsten wird die Lieferantenauswahl zurückgegeben, wenn die zu beschaffende Menge gedeckt ist.
+Dieser Ansatz ist als Pseudocode in Quellcode \ref{lst:greedy2} dargestellt.
+Auch lassen sich noch Verbesserungen anbringen, wie zum Beispiel, dass im Falle eines Abbruchs stattdessen versucht wird die Restmenge noch auf die bereits ausgewählten Lieferanten zu verteilen.
+
+\subsection{Evolutionärer Algorithmus}\label{subsec:ea}
+
+\section{Schluss}\label{sec:conclusion}

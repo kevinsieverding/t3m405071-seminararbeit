@@ -1,0 +1,54 @@
+\section{Quellcode}\label{sec:sourcecode}
+
+\begin{longlisting}
+  \begin{minted}{text}
+    Input: X, S, M, a, Z, max_skip
+    Output: selection, allotment, value
+  
+    selection = []                # Liste der ausgewählten Lieferanten
+    x = []                        # Liste der Bestellmenge pro Lieferant
+    sum = 0                       # Summe der Bestellmengen
+    inc = X / a                   # Inkrement pro Iteration
+    best = 0                      # Bester Wert der Zielfunktion
+    skipped = 0                   # Anzahl der übersprungenen Iterationen
+  
+    function addToSupplier(allt):
+      i = random(1, n)            # Wähle einen zufälligen Lieferanten
+      if S_i not in selection:    # Füge ihn zur Auswahl hinzu, falls noch 
+                                  #   nicht vorhanden
+        add S_i to selection
+      if x_i + allt > M_i:        # Überprüfe, ob die Zuweisung die maximale 
+                                  #   Bestellmenge überschreitet
+        allt = allt - (M_i - x_i) # Reduziere das Inkrement um die Menge bis 
+                                  #   zur maximalen Bestellmenge
+        x_i = M_i                 # Setze die Bestellmenge auf die maximale 
+                                  #   Bestellmenge
+        addToSupplier(allt)       # Füge den Rest des Zuweisung einem anderen 
+                                  #   Lieferanten hinzu
+      else:
+        x_i = x_i + allt          # Erhöhe die Bestellmenge um das Inkrement
+  
+    while (sum < X):              # Iteriere solange, bis die zu beschaffende 
+                                  #   Menge erreicht ist
+      addToSupplier(inc)          # Füge das Inkrement einem Lieferanten hinzu
+      current = Z(selection)      # Berechne den aktuellen Wert der 
+                                  #   Zielfunktion
+      if (current < best):        # Überprüfe, ob der aktuelle Wert besser ist 
+                                  # als der bisher beste
+        reset(selection, x)       # Falls nicht, setze die Auswahl und die
+                                  #   Bestellmengen auf den letzten Zustand 
+                                  #   zurück
+        skipped = skipped + 1     # Erhöhe die Anzahl der übersprungenen
+                                  # Iterationen
+        if (skipped > max_skip):  # Überprüfe, ob die maximale Anzahl an
+                                  # Wiederholungen erreicht ist
+          throw error             # Falls ja, breche den Algorithmus ab
+      else:
+        best = current            # Falls ja, setze den besten Wert auf den 
+                                  #   aktuellen
+        sum = sum + inc           # Erhöhe die Summe der Bestellmengen um das 
+                                  #   Inkrement
+    return selection, x, best     # Gebe die Auswahl und den besten Wert zurück
+  \end{minted}
+  \caption{Greedy-Algorithmus II}\label{lst:greedy2}
+\end{longlisting}
