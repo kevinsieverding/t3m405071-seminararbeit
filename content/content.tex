@@ -142,4 +142,24 @@ Auch lassen sich noch Verbesserungen anbringen, wie zum Beispiel, dass im Falle 
 
 \subsection{Evolutionärer Algorithmus}\label{subsec:ea}
 
+Um womöglich bessere Ergebnisse zu erzielen, kann ein evolutionärer Algorithmus verwendet werden.
+Hierzu können die Lösungen, welche zunächst mit einem Greedy-Algorithmus erzeugt werden, als Individuen in der Start-Generation dienen.
+Diese Individuen können dann miteinander gekreuzt und mutiert werden, um neue Individuen zu erzeugen.
+
+Zur Mutation kann die Bestellmenge welches einem ausgewählten Lieferanten in der Lösung zugewiesen ist, auf einen oder mehr andere Lieferanten aufgeteilt werden.
+Um zwei Individuen zu kreuzen kann die Vereinigung ihrer Lieferantenauswahl als Vorauswahl für den zweiten, oben beschriebenen, Greedy-Algorithmus verwendet werden, um somit neue Individuen zu erzeugen.
+
+Dadurch, dass diese Mutations- und Kreuzungsverfahren die Individuen nicht übermäßig stark verändern, ist es unwahrscheinlich, dass es zu einer Verschlechterung von Nachkommengenerationen kommt.
+Bei sorgfältiger Wahl der Generationsgröße, Mutations- und Kreuzungswahrscheinlichkeit, sollte der Algorithmus bessere Ergebnisse erzielen können als ein Greedy-Verfahren alleine.
+
 \section{Schluss}\label{sec:conclusion}
+
+In dieser Arbeit wurde der Prozess der Lieferantenauswahl unter Berücksichtigung von Resilienzfaktoren mittels Computational Intelligence untersucht.
+Das vorgestellte Modell unterstützt die Entscheidungsfindung bei der Auswahl von Lieferanten unter Berücksichtigung von mehreren Resilienzfaktoren, wie der Lieferantenbeziehung und verschiedenen Formen von Risiko.
+Hierzu wurden zwei Greedy-Verfahren vorgestellt und die Möglichkeiten für eine weitere Verbesserung der Lösungsfindung mittels eines evolutionären Algorithmus beschrieben.
+
+Obwohl das Modell viele Faktoren berücksichtigt, so lässt es doch einen wichtigen Faktor außer Acht: Kosten.
+Hier obliegt es immer noch dem Einkäufer zu entscheiden, wobei die Algorithmen hier immerhin eine Auswahl von Alternativen bieten.
+Kosten können noch in das Modell aufgenommen werden, allerdings müsste man sie hierfür auf den gleichen Wertebereich abbilden, wie die anderen Faktoren.
+Dazu müsste man zuvor die minimal und maximal möglichen Kosten ermitteln, was ein Optimierungsproblem für sich ist.
+Dies wäre ein guter Ansatzpunkt für weiterführende Arbeit in diesem Bereich.
